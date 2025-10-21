@@ -2,7 +2,7 @@ package com.api.quesIo.clientes.dtos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.validator.constraints.br.CNPJ;
+import org.hibernate.validator.constraints.br.CPF;
 
 @Data
 
@@ -10,7 +10,7 @@ public class ClienteDto {
     @NotBlank(message = "O nome é obrigatório")
     private String nome;
     private String endereco;
-    @CNPJ
+    @CPF
     private String cnpj;
     @Email
     private String email;
