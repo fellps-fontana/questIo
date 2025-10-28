@@ -13,7 +13,7 @@ public class QuestionarioModel {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", referencedColumnName = "id_cliente")
+    @JoinColumn(name = "cliente_id", referencedColumnName = "id")
     private ClienteModel cliente;
 
     private String titulo;

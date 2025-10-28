@@ -21,7 +21,6 @@ public class ClienteService {
         clienteModel.setEmail(clienteDto.getEmail());
         clienteModel.setTelefone(clienteDto.getTelefone());
         clienteModel.setEndereco(clienteDto.getEndereco());
-        clienteModel.setCnpj(clienteDto.getCnpj());
         return clienteRepository.save(clienteModel);
     }
 

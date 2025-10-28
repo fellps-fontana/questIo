@@ -13,8 +13,6 @@ public class UsuarioModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String nome;
-    private String endereco;
-    private String cpf;
     private String email;
 
     @ManyToOne(fetch = FetchType.LAZY) // Carregamento preguiçoso para melhor performance
