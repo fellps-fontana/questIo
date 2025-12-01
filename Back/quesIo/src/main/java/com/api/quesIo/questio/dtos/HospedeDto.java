@@ -9,17 +9,20 @@ import java.time.LocalDateTime;
 public class HospedeDto {
 
     @NotBlank(message = "O nome é obrigatório")
-    private String name; // Front manda 'name'
+    private String name;
 
-    @Email
     @NotBlank(message = "O email é obrigatório")
+    @Email
     private String email;
 
-    private String phone; // Front manda 'phone'
+    private String phone;
 
-    private String room; // Novo campo
+    @NotBlank(message = "O número do quarto é obrigatório")
+    private String room;
 
-    // O Spring converte a String ISO do Angular para LocalDateTime automaticamente
+    // O Spring aceita String ISO (ex: "2025-11-27T10:00:00") e converte para LocalDateTime
     private LocalDateTime checkin;
     private LocalDateTime checkout;
+
+
 }

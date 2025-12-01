@@ -12,6 +12,6 @@ public class QuestionarioDto {
 
     private String description;
 
-    // Agora o JSON de criação já pode vir com as perguntas!
+    // Lista de perguntas para criar tudo de uma vez
     private List<PerguntaDto> questions;
 }

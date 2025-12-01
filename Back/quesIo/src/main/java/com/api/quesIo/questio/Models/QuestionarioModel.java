@@ -16,20 +16,28 @@ public class QuestionarioModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Mantive Long (Front: number)
+    private Long id;
 
     @Column(nullable = false)
-    private String title; // Front: title
+    private String title;
 
-    private String description; // Front: description
+    private String description;
 
     private boolean active = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    // A MÁGICA: Um questionário tem várias perguntas
     @OneToMany(mappedBy = "questionario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Importante: Diz pro JSON serializar essa lista
+    @JsonManagedReference
     private List<PerguntaModel> questions = new ArrayList<>();
+
+    // --- CAMPOS CALCULADOS (NÃO SALVAM NO BANCO) ---
+    // Adicione estes campos para corrigir o erro no Service
+
+    @Transient
+    private Integer totalAnswers;
+
+    @Transient
+    private LocalDateTime lastAnswerAt;
 }

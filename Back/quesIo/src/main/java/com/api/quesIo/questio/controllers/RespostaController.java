@@ -20,13 +20,19 @@ public class RespostaController {
         this.service = service;
     }
 
-    // O Front vai fazer POST em: /respostas/enviar/{id-do-hospede}
-    // O Body vai ser um Array JSON: [ { "questionId": "...", "value": "..." }, ... ]
+    // Endpoint para ENVIAR respostas (Hóspede)
     @PostMapping("/enviar/{hospedeId}")
     public ResponseEntity<List<RespostaModel>> enviar(
             @PathVariable UUID hospedeId,
             @RequestBody List<RespostaDto> respostas) {
 
         return ResponseEntity.ok(service.salvarRespostas(hospedeId, respostas));
+    }
+
+    // --- CORREÇÃO AQUI: Adicionado @GetMapping ---
+    // Endpoint para BUSCAR respostas (Painel Admin)
+    @GetMapping("/form/{formId}")
+    public ResponseEntity<List<RespostaDto>> listarPorFormulario(@PathVariable Long formId) {
+        return ResponseEntity.ok(service.listarPorFormulario(formId));
     }
 }

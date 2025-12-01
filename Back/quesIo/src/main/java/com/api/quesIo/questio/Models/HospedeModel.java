@@ -36,4 +36,8 @@ public class HospedeModel {
 
     @Column(name = "check_out")
     private LocalDateTime checkout;
+
+    @ManyToOne
+    @JoinColumn(name = "questionario_id")
+    private QuestionarioModel questionarioAtribuido;
 }

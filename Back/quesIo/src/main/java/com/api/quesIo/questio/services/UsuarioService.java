@@ -3,31 +3,43 @@ package com.api.quesIo.questio.services;
 import com.api.quesIo.questio.Models.UsuarioModel;
 import com.api.quesIo.questio.Repositorys.UsuarioRepository;
 import com.api.quesIo.questio.dtos.UsuarioDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.api.quesIo.questio.enums.FuncaoEnum;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UsuarioRepository _usuarioRepository ;
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        _usuarioRepository = usuarioRepository ;
+    private final UsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
+
+    // Injeção de dependência via Construtor (Prática recomendada)
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    public UsuarioModel create(UsuarioDto dto) {
+        // Verifica se email já existe antes de tentar criar
+        if (repository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("E-mail já cadastrado!");
+        }
 
-    public UsuarioModel create (UsuarioDto usuario )
-    {
-        UsuarioModel usuarioModel = new UsuarioModel() ;
-        String senhaLimpa = usuario.getSenha();
-        String senhaCriptografada = passwordEncoder.encode(senhaLimpa);
-        usuarioModel.setSenha(senhaCriptografada);
-        usuarioModel.setNome(usuario.getNome());
-        usuarioModel.setEmail(usuario.getEmail());
-        return usuarioModel ;
+        UsuarioModel model = new UsuarioModel();
+
+        // 1. CORREÇÃO DOS GETTERS (Usando os nomes do DTO em Inglês)
+        model.setNome(dto.getName());      // Antes estava getNome()
+        model.setEmail(dto.getEmail());
+
+        // 2. CRIPTOGRAFIA (Usando getPassword do DTO)
+        String senhaCriptografada = passwordEncoder.encode(dto.getPassword());
+        model.setSenha(senhaCriptografada);
+
+        // 3. CAMPOS OBRIGATÓRIOS (Sem isso dá erro de SQL)
+        model.setFuncao(FuncaoEnum.USER); // Define como usuário comum por padrão
+        model.setAtivo(true);
+
+        // 4. SALVAR NO BANCO (Faltava isso!)
+        return repository.save(model);
     }
-
 }

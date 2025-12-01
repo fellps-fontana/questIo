@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "/")
+// CORREÇÃO 1: Libera a porta do Angular
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/forms") // Padrão REST: substantivos no plural
+@RequestMapping("/forms")
 public class QuestionarioController {
 
     private final QuestionarioService service;
@@ -20,13 +21,32 @@ public class QuestionarioController {
         this.service = service;
     }
 
+    // Listar todos
+    @GetMapping
+    public ResponseEntity<List<QuestionarioModel>> list() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    // Criar novo
     @PostMapping
     public ResponseEntity<QuestionarioModel> create(@RequestBody @Valid QuestionarioDto dto) {
         return ResponseEntity.ok(service.create(dto));
     }
 
-    @GetMapping
-    public ResponseEntity<List<QuestionarioModel>> list() {
-        return ResponseEntity.ok(service.findAll());
+    // CORREÇÃO 2: Adicionei para o Front poder buscar um form específico (edição/visualização)
+    @GetMapping("/{id}")
+    public ResponseEntity<QuestionarioModel> getById(@PathVariable Long id) {
+        // Você precisará adicionar o método 'findById' no seu Service se não tiver
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // CORREÇÃO 3: Adicionei para o botão de Excluir do Front funcionar
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        // Você precisará adicionar o método 'delete' no seu Service se não tiver
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

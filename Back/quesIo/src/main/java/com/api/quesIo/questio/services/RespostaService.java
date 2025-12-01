@@ -27,31 +27,45 @@ public class RespostaService {
         this.perguntaRepository = pr;
     }
 
-    @Transactional // Garante que salva TUDO ou NADA (Rollback se der erro)
+    @Transactional
     public List<RespostaModel> salvarRespostas(UUID hospedeId, List<RespostaDto> listaRespostas) {
-
-        // 1. Acha o hóspede
         HospedeModel hospede = hospedeRepository.findById(hospedeId)
                 .orElseThrow(() -> new RuntimeException("Hóspede não encontrado"));
 
         List<RespostaModel> salvas = new ArrayList<>();
 
-        // 2. Itera sobre cada resposta vinda do front
         for (RespostaDto dto : listaRespostas) {
-
-            // Acha a pergunta no banco pelo ID que veio do front
             PerguntaModel pergunta = perguntaRepository.findById(dto.getQuestionId())
                     .orElseThrow(() -> new RuntimeException("Pergunta inválida ID: " + dto.getQuestionId()));
 
-            // Cria o objeto para salvar
             RespostaModel modelo = new RespostaModel();
             modelo.setHospede(hospede);
             modelo.setPergunta(pergunta);
-            modelo.setValor(dto.getValue()); // Salva como String
+            modelo.setValor(dto.getValue());
 
             salvas.add(respostaRepository.save(modelo));
         }
-
         return salvas;
+    }
+
+    public List<RespostaDto> listarPorFormulario(Long formId) {
+        // CORREÇÃO AQUI: Use o nome do método com @Query que criamos no Repository
+        List<RespostaModel> respostas = respostaRepository.buscarRespostasPorFormulario(formId);
+
+        List<RespostaDto> listaRetorno = new ArrayList<>();
+
+        for (RespostaModel r : respostas) {
+            RespostaDto dto = new RespostaDto();
+
+            PerguntaModel p = r.getPergunta();
+            if (p != null) {
+                dto.setQuestionId(p.getId());
+            }
+
+            dto.setValue(r.getValor());
+            listaRetorno.add(dto);
+        }
+
+        return listaRetorno;
     }
 }
