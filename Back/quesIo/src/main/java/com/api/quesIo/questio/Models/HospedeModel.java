@@ -40,4 +40,7 @@ public class HospedeModel {
     @ManyToOne
     @JoinColumn(name = "questionario_id")
     private QuestionarioModel questionarioAtribuido;
+
+    @Column(name = "x_enviado_email")
+    private boolean xEnviadoEmail;
 }
