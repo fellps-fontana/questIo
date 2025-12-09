@@ -1,7 +1,7 @@
 package com.api.quesIo.questio.controllers;
 
 import com.api.quesIo.questio.dtos.HospedeDto;
-import com.api.quesIo.questio.dtos.HospedeResponseDto; // Importante!
+import com.api.quesIo.questio.dtos.HospedeResponseDto;
 import com.api.quesIo.questio.dtos.QuestionarioDto;
 import com.api.quesIo.questio.services.HospedeService;
 import jakarta.validation.Valid;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:4200") // Origem exata do Angular
+@CrossOrigin(origins = "*") // Liberado para testes (depois pode restringir)
 @RestController
-@RequestMapping("/hospede") // Ou "/clientes", verifique como está no seu front
+@RequestMapping("/hospedes") // CORREÇÃO: Plural (igual ao Front)
 public class HospedeController {
 
     private final HospedeService hospedeService;
@@ -23,69 +23,58 @@ public class HospedeController {
         this.hospedeService = hospedeService;
     }
 
-    // CORREÇÃO 1: O retorno agora é uma lista de DTOs (com o link)
-    @GetMapping("/listar")
-    public List<HospedeResponseDto> list() {
-        return hospedeService.findAll();
+    // LISTAR (GET /hospedes)
+    @GetMapping
+    public ResponseEntity<List<HospedeResponseDto>> list() {
+        return ResponseEntity.ok(hospedeService.findAll());
     }
 
-    // CORREÇÃO 2: O service agora devolve DTO, não Model
-    @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody @Valid HospedeDto dto) {
-        try {
-            HospedeResponseDto produtoSalvo = hospedeService.create(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao salvar: " + e.getMessage());
-        }
+    // CRIAR (POST /hospedes)
+    @PostMapping
+    public ResponseEntity<HospedeResponseDto> salvar(@RequestBody @Valid HospedeDto dto) {
+        // Retorna 201 Created
+        HospedeResponseDto salvo = hospedeService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
-    // CORREÇÃO 3: Ordem dos parâmetros e Tipo de retorno
-    @PostMapping("/editar/{id}")
-    public ResponseEntity<?> editar(
-            @RequestBody @Valid HospedeDto dto,
-            @PathVariable(value = "id") UUID id
+    // EDITAR (PUT /hospedes/{id})
+    @PutMapping("/{id}")
+    public ResponseEntity<HospedeResponseDto> editar(
+            @PathVariable UUID id,
+            @RequestBody @Valid HospedeDto dto
     ) {
-        try {
-            // ATENÇÃO: A ordem correta é (id, dto) conforme definimos no Service
-            HospedeResponseDto produtoEditado = hospedeService.update(id, dto);
-            return ResponseEntity.ok(produtoEditado);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro: " + e.getMessage());
-        }
+        return ResponseEntity.ok(hospedeService.update(id, dto));
     }
 
-    @PostMapping("/apagar/{id}")
-    public ResponseEntity<String> apagar(@PathVariable UUID id) {
-        try {
-            hospedeService.delete(id);
-            return ResponseEntity.ok("Cliente apagado com sucesso!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro: " + e.getMessage());
-        }
+    // DELETAR (DELETE /hospedes/{id})
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> apagar(@PathVariable UUID id) {
+        hospedeService.delete(id);
+        return ResponseEntity.ok("Cliente apagado com sucesso!");
     }
 
-    // PATCH /clientes/{hospedeId}/atribuir/{formId}
-    @PatchMapping("/{hospedeId}/atribuir/{formId}")
-    public ResponseEntity<Void> atribuirFormulario(
+    // ATRIBUIR (PUT /hospedes/{id}/atribuir/{formId})
+    // Ajustado para PUT para bater com o Service do Angular
+    @PutMapping("/{hospedeId}/atribuir/{formId}")
+    public ResponseEntity<?> atribuirFormulario(
             @PathVariable UUID hospedeId,
             @PathVariable Long formId) {
 
         hospedeService.atribuirQuestionario(hospedeId, formId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Formulário atribuído!");
     }
 
-    // Rota para desatribuir (opcional)
-    @PatchMapping("/{hospedeId}/desatribuir")
-    public ResponseEntity<Void> desatribuir(@PathVariable UUID hospedeId) {
+    // DESATRIBUIR
+    @PutMapping("/{hospedeId}/desatribuir")
+    public ResponseEntity<?> desatribuir(@PathVariable UUID hospedeId) {
         hospedeService.atribuirQuestionario(hospedeId, null);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Formulário desvinculado.");
     }
 
-    // GET /hospede/public/{id}
-    @GetMapping("/public/{id}")
+    // ROTA PÚBLICA (GET /hospedes/publico/{id}/questionario)
+    // Essa é a rota que o Link do E-mail e o componente PublicForm usam
+    @GetMapping("/publico/{id}/questionario")
     public ResponseEntity<QuestionarioDto> pegarFormulario(@PathVariable UUID id) {
-        // Esse método busca o questionário vinculado ao hóspede
         return ResponseEntity.ok(hospedeService.buscarQuestionarioDoHospede(id));
     }
 }

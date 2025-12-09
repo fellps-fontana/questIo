@@ -8,7 +8,6 @@ import com.api.quesIo.questio.dtos.HospedeDto;
 import com.api.quesIo.questio.dtos.HospedeResponseDto;
 import com.api.quesIo.questio.dtos.PerguntaDto;
 import com.api.quesIo.questio.dtos.QuestionarioDto;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,114 +17,116 @@ import java.util.stream.Collectors;
 @Service
 public class HospedeService {
 
-    // URL do seu Front (Angular). Hoje é localhost, no futuro será seu site.
-    private final String FRONT_URL = "http://localhost:4200/public/form?id=";
+    // URL para onde o hóspede vai quando clica no link (tem que bater com a rota do Angular)
+    // No email scheduler definimos como /responder/, então vamos manter padrão aqui
+    private final String FRONT_URL = "http://localhost:4200/responder/";
 
     private final HospedeRepository hospedeRepository;
     private final QuestionarioRepository questionarioRepository;
 
-
-    public HospedeService(HospedeRepository hospedeRepository,  QuestionarioRepository questionarioRepository) {
+    public HospedeService(HospedeRepository hospedeRepository, QuestionarioRepository questionarioRepository) {
         this.hospedeRepository = hospedeRepository;
         this.questionarioRepository = questionarioRepository;
     }
 
-    // LISTAR TODOS (Agora devolve DTO com link)
+    // --- LISTAR TODOS ---
     public List<HospedeResponseDto> findAll() {
         return hospedeRepository.findAll().stream()
-                .map(this::converterParaDto) // Chama o método lá de baixo
+                .map(this::converterParaDto)
                 .collect(Collectors.toList());
     }
 
-    // CRIAR (Agora devolve DTO com link)
+    // --- CRIAR (BLINDADO) ---
     public HospedeResponseDto create(HospedeDto dto) {
         HospedeModel model = new HospedeModel();
-        BeanUtils.copyProperties(dto, model);
 
-        // Garante que o ID seja gerado se não vier (o banco gera, mas o save retorna preenchido)
+        // Mapeamento MANUAL (Garante que CheckIn/Out sejam salvos)
+        model.setName(dto.getName());
+        model.setEmail(dto.getEmail());
+        model.setPhone(dto.getPhone());
+        model.setRoom(dto.getRoom());
+        model.setCheckIn(dto.getCheckIn());   // Crítico para o agendador
+        model.setCheckOut(dto.getCheckOut()); // Crítico para o agendador
+
+        // Inicializa como false, pois acabou de criar
+        model.setEmailSent(false);
+
         HospedeModel salvo = hospedeRepository.save(model);
-
         return converterParaDto(salvo);
     }
 
-    // Deletar
+    // --- ATUALIZAR ---
+    public HospedeResponseDto update(UUID id, HospedeDto dto) {
+        HospedeModel existente = hospedeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Hóspede não encontrado com ID: " + id));
+
+        // Atualiza os campos
+        existente.setName(dto.getName());
+        existente.setEmail(dto.getEmail());
+        existente.setPhone(dto.getPhone());
+        existente.setRoom(dto.getRoom());
+        existente.setCheckIn(dto.getCheckIn());
+        existente.setCheckOut(dto.getCheckOut());
+
+        // Não alteramos o emailSent no update (geralmente), a não ser que queira reenviar
+
+        HospedeModel salvo = hospedeRepository.save(existente);
+        return converterParaDto(salvo);
+    }
+
+    // --- DELETAR ---
     public void delete(UUID id) {
         hospedeRepository.deleteById(id);
     }
 
-    // --- O CONVERSOR MÁGICO ---
-// ... imports
-
-    // MÉTODO NOVO: ATRIBUIR FORMULÁRIO
+    // --- ATRIBUIR QUESTIONÁRIO ---
     public void atribuirQuestionario(UUID hospedeId, Long questionarioId) {
         HospedeModel hospede = hospedeRepository.findById(hospedeId)
                 .orElseThrow(() -> new RuntimeException("Hóspede não encontrado"));
 
-        // Se questionarioId for nulo, desatribui
         if (questionarioId == null) {
             hospede.setAssignedQuestionnaire(null);
         } else {
-            // Busca o questionário no banco (precisa injetar o QuestionarioRepository)
             QuestionarioModel questionario = questionarioRepository.findById(questionarioId)
                     .orElseThrow(() -> new RuntimeException("Questionário não encontrado"));
 
             hospede.setAssignedQuestionnaire(questionario);
         }
-
         hospedeRepository.save(hospede);
     }
 
-    // AJUSTE NO CONVERSOR (para mandar o ID pro front)
-    private HospedeResponseDto converterParaDto(HospedeModel model) {
-        HospedeResponseDto dto = new HospedeResponseDto();
-        BeanUtils.copyProperties(model, dto);
-        dto.setLinkAcesso(FRONT_URL + model.getId());
-
-        // Manda o ID do form atribuído (se tiver)
-        if (model.getAssignedQuestionnaire() != null) {
-            dto.setAssignedFormId(model.getAssignedQuestionnaire().getId());
-        }
-
-        return dto;
-    }
-    // ATUALIZAR
-    public HospedeResponseDto update(UUID id, HospedeDto dto) {
-        // 1. Busca o hóspede existente. Se não achar, estoura erro.
-        HospedeModel existente = hospedeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Hóspede não encontrado com ID: " + id));
-
-        // 2. Copia os dados novos do DTO para o Model existente
-        // IMPORTANTE: Ignoramos a propriedade "id" para não alterar a chave primária
-        BeanUtils.copyProperties(dto, existente, "id");
-
-        // 3. Salva as alterações
-        HospedeModel salvo = hospedeRepository.save(existente);
-
-        // 4. Retorna o DTO com o link gerado
-        return converterParaDto(salvo);
-    }
+    // --- BUSCAR QUESTIONÁRIO DO HÓSPEDE (Para o Front responder) ---
     public QuestionarioDto buscarQuestionarioDoHospede(UUID hospedeId) {
         HospedeModel hospede = hospedeRepository.findById(hospedeId)
                 .orElseThrow(() -> new RuntimeException("Link inválido ou hóspede não encontrado."));
 
-        // Se quiser travar por data, descomente a linha abaixo:
-        // validarAcessoAoFormulario(hospedeId);
-
+        // --- TRAVA DE SEGURANÇA ---
+        if (hospede.isResponded()) {
+            // Lança um erro específico que vamos pegar no Front
+            throw new RuntimeException("RESPONDIDO");
+        }
         QuestionarioModel questionario = hospede.getAssignedQuestionnaire();
+
         if (questionario == null) {
+            // Se não tiver específico, pode buscar um padrão ou lançar erro
             throw new RuntimeException("Nenhuma pesquisa foi atribuída para você.");
         }
 
+        if (!questionario.isActive()) {
+            throw new RuntimeException("Este questionário não está mais ativo.");
+        }
+
+        // Converte para DTO
         QuestionarioDto formDto = new QuestionarioDto();
+        formDto.setId(questionario.getId()); // Importante mandar o ID do form
         formDto.setTitle(questionario.getTitle());
         formDto.setDescription(questionario.getDescription());
 
-        // Mapeia as perguntas
         List<PerguntaDto> perguntasDto = questionario.getQuestions().stream().map(p -> {
             PerguntaDto pDto = new PerguntaDto();
             pDto.setId(p.getId());
-            pDto.setPrompt(p.getPrompt());
-            pDto.setType(p.getType());
+            pDto.setPrompt(p.getPrompt()); // Enunciado
+            pDto.setType(p.getType());     // Enum ou String
             pDto.setOrderIndex(p.getOrderIndex());
             pDto.setRequired(p.getRequired());
             return pDto;
@@ -133,5 +134,29 @@ public class HospedeService {
 
         formDto.setQuestions(perguntasDto);
         return formDto;
+    }
+
+    // --- CONVERSOR INTERNO ---
+    private HospedeResponseDto converterParaDto(HospedeModel model) {
+        HospedeResponseDto dto = new HospedeResponseDto();
+
+        dto.setId(model.getId());
+        dto.setName(model.getName());
+        dto.setEmail(model.getEmail());
+        dto.setPhone(model.getPhone());
+        dto.setRoom(model.getRoom());
+        dto.setCheckIn(model.getCheckIn());
+        dto.setCheckOut(model.getCheckOut());
+        dto.setEmailSent(model.isEmailSent());
+
+        // Gera o link usando o ID do hóspede
+        // Ex: http://localhost:4200/responder/550e8400-e29b...
+        dto.setLinkAcesso(FRONT_URL + model.getId());
+
+        if (model.getAssignedQuestionnaire() != null) {
+            dto.setAssignedFormId(model.getAssignedQuestionnaire().getId());
+        }
+
+        return dto;
     }
 }

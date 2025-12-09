@@ -10,9 +10,5 @@ import java.util.UUID;
 
 public interface HospedeRepository extends JpaRepository<HospedeModel, UUID>{
 
-    @Query("SELECT h FROM HospedeModel h " +
-            "WHERE h.checkOut < :agora " +
-            "AND h.emailSent = false")
-    List<HospedeModel> buscarCheckoutVencidoNaoEnviado(LocalDateTime agora);
-
+    List<HospedeModel> findByCheckOutBeforeAndEmailSentFalse(LocalDateTime agora);
 }

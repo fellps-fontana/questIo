@@ -11,13 +11,17 @@ public class HospedeResponseDto {
     private String email;
     private String phone;
     private String room;
-    private LocalDateTime checkin;
-    private LocalDateTime checkout;
 
-    // Para o front saber se mostra o botão "Fazer Checkout" ou "Concluído"
-    private LocalDateTime checkoutRealizadoEm;
+    // --- CORREÇÃO: Usando CamelCase para bater com o Model e Service ---
+    private LocalDateTime checkIn;  // Antes: checkin
+    private LocalDateTime checkOut; // Antes: checkout
 
-    // O CAMPO MÁGICO: O Java vai preencher isso na hora de devolver pro front
+    // --- NOVO CAMPO (Necessário para o dashboard saber se já enviou) ---
+    private boolean emailSent;
+
+    // O Java preenche isso com o Link: http://localhost:4200/responder/...
     private String linkAcesso;
+
+    // ID do questionário vinculado
     private Long assignedFormId;
 }

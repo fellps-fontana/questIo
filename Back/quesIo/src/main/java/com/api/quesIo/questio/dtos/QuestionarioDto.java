@@ -7,11 +7,14 @@ import java.util.List;
 @Data
 public class QuestionarioDto {
 
-    @NotBlank(message = "O título é obrigatório")
+    // Adicionado o ID (pode ser nulo na criação, mas obrigatório na resposta)
+    private Long id;
+
+    @NotBlank(message = "Title is required")
     private String title;
 
     private String description;
 
-    // Lista de perguntas para criar tudo de uma vez
+    // Lista de perguntas (Questions)
     private List<PerguntaDto> questions;
 }

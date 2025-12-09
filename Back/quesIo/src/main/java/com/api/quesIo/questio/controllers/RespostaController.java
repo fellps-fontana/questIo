@@ -20,17 +20,26 @@ public class RespostaController {
         this.service = service;
     }
 
-    // Endpoint para ENVIAR respostas (Hóspede)
+    // --- ROTA NOVA (Que o Front atual está chamando) ---
+    @PostMapping("/lote")
+    public ResponseEntity<?> salvarLote(@RequestBody List<RespostaDto> dtos) {
+        // Chama o método do service que lida com a lista completa
+        service.salvarRespostasEmLote(dtos);
+        return ResponseEntity.ok("Respostas salvas com sucesso!");
+    }
+
+    // --- ROTA ANTIGA (Mantida por segurança) ---
     @PostMapping("/enviar/{hospedeId}")
-    public ResponseEntity<List<RespostaModel>> enviar(
+    public ResponseEntity<?> enviar(
             @PathVariable UUID hospedeId,
             @RequestBody List<RespostaDto> respostas) {
 
-        return ResponseEntity.ok(service.salvarRespostas(hospedeId, respostas));
+        // Se o seu service só tinha esse método, a gente usa ele aqui
+        service.salvarRespostas(hospedeId, respostas);
+        return ResponseEntity.ok("Enviado!");
     }
 
-    // --- CORREÇÃO AQUI: Adicionado @GetMapping ---
-    // Endpoint para BUSCAR respostas (Painel Admin)
+    // BUSCAR (Admin)
     @GetMapping("/form/{formId}")
     public ResponseEntity<List<RespostaDto>> listarPorFormulario(@PathVariable Long formId) {
         return ResponseEntity.ok(service.listarPorFormulario(formId));

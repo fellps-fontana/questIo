@@ -27,6 +27,27 @@ public class RespostaService {
         this.perguntaRepository = pr;
     }
 
+    // --- NOVO MÉTODO: O QUE FALTAVA ---
+    // Esse é o método que o Controller /lote está chamando
+// No método salvarRespostasEmLote
+    @Transactional
+    public void salvarRespostasEmLote(List<RespostaDto> dtos) {
+        if (dtos == null || dtos.isEmpty()) return;
+
+        UUID guestId = dtos.get(0).getGuestId();
+
+        // 1. Salva as respostas (Lógica antiga)
+        salvarRespostas(guestId, dtos);
+
+        // 2. ATUALIZA O STATUS DO HÓSPEDE (NOVO)
+        HospedeModel hospede = hospedeRepository.findById(guestId)
+                .orElseThrow(() -> new RuntimeException("Hóspede não encontrado"));
+
+        hospede.setResponded(true); // Marca como respondido
+        hospedeRepository.save(hospede);
+    }
+
+    // --- SEU MÉTODO EXISTENTE (Mantido) ---
     @Transactional
     public List<RespostaModel> salvarRespostas(UUID hospedeId, List<RespostaDto> listaRespostas) {
         HospedeModel hospede = hospedeRepository.findById(hospedeId)
@@ -49,13 +70,17 @@ public class RespostaService {
     }
 
     public List<RespostaDto> listarPorFormulario(Long formId) {
-        // CORREÇÃO AQUI: Use o nome do método com @Query que criamos no Repository
         List<RespostaModel> respostas = respostaRepository.buscarRespostasPorFormulario(formId);
 
         List<RespostaDto> listaRetorno = new ArrayList<>();
 
         for (RespostaModel r : respostas) {
             RespostaDto dto = new RespostaDto();
+
+            // Preenche o guestId para o admin saber de quem é a resposta
+            if (r.getGuest() != null) {
+                dto.setGuestId(r.getGuest().getId());
+            }
 
             PerguntaModel p = r.getQuestion();
             if (p != null) {

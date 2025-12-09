@@ -12,8 +12,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "hospedes") // Tabela em Português
-public class HospedeModel { // Classe em Português
+@Table(name = "hospedes") // guests
+public class HospedeModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,11 +35,14 @@ public class HospedeModel { // Classe em Português
     @Column(name = "check_out")
     private LocalDateTime checkOut;
 
-    // Qual questionário este hóspede deve responder?
     @ManyToOne
-    @JoinColumn(name = "questionario_id")
+    @JoinColumn(name = "questionnaire_id")
     private QuestionarioModel assignedQuestionnaire;
 
     @Column(name = "email_sent")
     private boolean emailSent;
+
+    // --- NOVO CAMPO: Bloqueia resposta duplicada ---
+    @Column(nullable = false)
+    private boolean responded = false;
 }

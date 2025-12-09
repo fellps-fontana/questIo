@@ -1,5 +1,6 @@
 package com.api.quesIo.questio.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -20,9 +21,11 @@ public class HospedeDto {
     @NotBlank(message = "O número do quarto é obrigatório")
     private String room;
 
-    // O Spring aceita String ISO (ex: "2025-11-27T10:00:00") e converte para LocalDateTime
-    private LocalDateTime checkin;
-    private LocalDateTime checkout;
+    // O Angular manda assim: "2023-12-09T14:30:00" (ISO 8601)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime checkIn;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime checkOut;
 
 }
