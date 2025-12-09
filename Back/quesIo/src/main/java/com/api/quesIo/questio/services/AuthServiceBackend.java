@@ -22,21 +22,21 @@ public class AuthServiceBackend {
         UsuarioModel usuario = repository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (!usuario.isAtivo()) {
+        if (!usuario.isActive()) {
             throw new RuntimeException("Usuário inativo");
         }
 
         // AGORA É PROFISSIONAL: Verifica se a senha bate com o hash
-        if (!passwordEncoder.matches(loginDto.getPassword(), usuario.getSenha())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), usuario.getPassword())) {
             throw new RuntimeException("Senha incorreta");
         }
 
         UsuarioResponseDto dto = new UsuarioResponseDto();
         dto.setId(usuario.getId());
-        dto.setName(usuario.getNome());
+        dto.setName(usuario.getName());
         dto.setEmail(usuario.getEmail());
-        dto.setRole(usuario.getFuncao().toString());
-        dto.setActive(usuario.isAtivo());
+        dto.setRole(usuario.getRole().toString());
+        dto.setActive(usuario.isActive());
 
         return dto;
     }

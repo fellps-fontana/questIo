@@ -28,7 +28,7 @@ public class PerguntaService {
 
         PerguntaModel pergunta = new PerguntaModel();
         BeanUtils.copyProperties(dto, pergunta);
-        pergunta.setQuestionario(questionario); // O Vínculo acontece aqui!
+        pergunta.setQuestionnaire(questionario); // O Vínculo acontece aqui!
 
         return perguntaRepository.save(pergunta);
     }

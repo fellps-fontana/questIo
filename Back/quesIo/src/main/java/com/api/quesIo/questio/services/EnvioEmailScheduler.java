@@ -31,7 +31,8 @@ public class EnvioEmailScheduler {
                         "Olá " + h.getName() + ",\n\nObrigado pela hospedagem! ..."
                 );
 
-                h.setXEnviadoEmail(true);
+                h.setEmailSent(true);
+                h.setEmailSent(true);
                 hospedeRepository.save(h);
 
             } catch (Exception e) {

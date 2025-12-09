@@ -28,16 +28,16 @@ public class UsuarioService {
         UsuarioModel model = new UsuarioModel();
 
         // 1. CORREÇÃO DOS GETTERS (Usando os nomes do DTO em Inglês)
-        model.setNome(dto.getName());      // Antes estava getNome()
+        model.setName(dto.getName());      // Antes estava getNome()
         model.setEmail(dto.getEmail());
 
         // 2. CRIPTOGRAFIA (Usando getPassword do DTO)
         String senhaCriptografada = passwordEncoder.encode(dto.getPassword());
-        model.setSenha(senhaCriptografada);
+        model.setPassword(senhaCriptografada);
 
         // 3. CAMPOS OBRIGATÓRIOS (Sem isso dá erro de SQL)
-        model.setFuncao(FuncaoEnum.USER); // Define como usuário comum por padrão
-        model.setAtivo(true);
+        model.setRole(FuncaoEnum.USER); // Define como usuário comum por padrão
+        model.setActive(true);
 
         // 4. SALVAR NO BANCO (Faltava isso!)
         return repository.save(model);

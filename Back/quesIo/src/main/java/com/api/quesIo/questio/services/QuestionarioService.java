@@ -31,7 +31,7 @@ public class QuestionarioService {
             List<PerguntaModel> perguntas = dto.getQuestions().stream().map(pDto -> {
                 PerguntaModel p = new PerguntaModel();
                 BeanUtils.copyProperties(pDto, p);
-                p.setQuestionario(questionario);
+                p.setQuestionnaire(questionario);
                 return p;
             }).collect(Collectors.toList());
 

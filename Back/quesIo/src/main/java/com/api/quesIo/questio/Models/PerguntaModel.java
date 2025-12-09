@@ -16,18 +16,21 @@ public class PerguntaModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private String prompt; // A pergunta em si (ex: "Como foi o atendimento?")
+    @Column(nullable = false)
+    private String prompt; // Mantido 'prompt' (Enunciado da pergunta)
 
     @Enumerated(EnumType.STRING)
-    private QuestionType type; // TEXT, STARS, etc.
+    private QuestionType type; // Lembre-se de ter o Enum criado
 
-    @Column(name = "ordem") // 'order' é palavra reservada em alguns bancos SQL
+    @Column(name = "ordem")
     private Integer orderIndex;
 
     private Boolean required = false;
 
+    // --- MANTENHA ASSIM (EM INGLÊS) ---
+    // Isso garante que o mappedBy="questionnaire" lá no QuestionarioModel funcione
     @ManyToOne
     @JoinColumn(name = "questionario_id")
-    @JsonBackReference // Evita loop infinito no JSON
-    private QuestionarioModel questionario;
+    @JsonBackReference
+    private QuestionarioModel questionnaire;
 }

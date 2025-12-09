@@ -5,15 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class UsuarioDto {
+public class UsuarioDto { // O nome da classe pode ficar em PT, sem problemas
 
-    @NotBlank(message = "O nome é obrigatório")
-    private String name; // Mapeia para Model.nome
+    @NotBlank(message = "Name is required")
+    private String name;      // Bate com Model.name
 
-    @NotBlank(message = "O email é obrigatório")
-    @Email(message = "Formato de email inválido")
-    private String email;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    private String email;     // Bate com Model.email
 
-    @NotBlank(message = "A senha é obrigatória")
-    private String password; // Mapeia para Model.senha
+    private String password;  // Bate com Model.password
+
+    private String role;      // Bate com Model.role (precisa converter Enum no controller)
+    private boolean active;   // Bate com Model.active
 }

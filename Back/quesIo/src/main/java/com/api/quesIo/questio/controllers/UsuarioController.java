@@ -34,10 +34,10 @@ public class UsuarioController {
                 .map(usuario -> {
                     UsuarioResponseDto dto = new UsuarioResponseDto();
                     dto.setId(usuario.getId());
-                    dto.setName(usuario.getNome());
+                    dto.setName(usuario.getName());
                     dto.setEmail(usuario.getEmail());
-                    dto.setRole(usuario.getFuncao().toString());
-                    dto.setActive(usuario.isAtivo());
+                    dto.setRole(usuario.getRole().toString());
+                    dto.setActive(usuario.isActive());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -53,15 +53,15 @@ public class UsuarioController {
         }
 
         UsuarioModel usuario = new UsuarioModel();
-        usuario.setNome(dto.getName()); // Usando o DTO
+        usuario.setName(dto.getName()); // Usando o DTO
         usuario.setEmail(dto.getEmail());
 
         // Criptografa a senha que veio do DTO
-        usuario.setSenha(passwordEncoder.encode(dto.getPassword()));
+        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         // Define padrões
-        usuario.setFuncao(FuncaoEnum.USER);
-        usuario.setAtivo(true);
+        usuario.setRole(FuncaoEnum.USER);
+        usuario.setActive(true);
 
         repository.save(usuario);
 

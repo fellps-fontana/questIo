@@ -23,14 +23,14 @@ public class DataSeeder implements CommandLineRunner {
         if (usuarioRepository.findByEmail("admin@questio.com").isEmpty()) {
 
             UsuarioModel admin = new UsuarioModel();
-            admin.setNome("Administrador Supremo");
+            admin.setName("Administrador Supremo");
             admin.setEmail("admin@questio.com");
 
             // AQUI A MÁGICA: Criptografa a senha antes de salvar
-            admin.setSenha(passwordEncoder.encode("123456"));
+            admin.setPassword(passwordEncoder.encode("123456"));
 
-            admin.setFuncao(FuncaoEnum.ADMIN);
-            admin.setAtivo(true);
+            admin.setRole(FuncaoEnum.ADMIN);
+            admin.setActive(true);
 
             usuarioRepository.save(admin);
             System.out.println("✅ USUÁRIO ADMIN CRIADO COM CRIPTOGRAFIA");

@@ -2,32 +2,36 @@ package com.api.quesIo.questio.Models;
 
 import com.api.quesIo.questio.enums.FuncaoEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "usuarios")
-public class UsuarioModel {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "usuarios") // Tabela em Português
+public class UsuarioModel { // Classe em Português
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false) // Nome é obrigatório
-    private String nome;
-
-    @Column(nullable = false, unique = true) // E-mail obrigatório e ÚNICO no banco
-    private String email;
-
-    @Column(nullable = false) // Senha obrigatória
-    private String senha;
-
-    @Enumerated(EnumType.STRING) // Salva no banco como texto: "ADMIN" ou "USER"
     @Column(nullable = false)
-    private FuncaoEnum funcao;
+    private String name;      // Campo em Inglês
+
+    @Column(nullable = false, unique = true)
+    private String email;     // Campo em Inglês
 
     @Column(nullable = false)
-    private boolean ativo = true;
+    private String password;  // Campo em Inglês
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FuncaoEnum role;  // Campo em Inglês
+
+    @Column(nullable = false)
+    private boolean active = true; // Campo em Inglês
 }

@@ -39,9 +39,9 @@ public class RespostaService {
                     .orElseThrow(() -> new RuntimeException("Pergunta inválida ID: " + dto.getQuestionId()));
 
             RespostaModel modelo = new RespostaModel();
-            modelo.setHospede(hospede);
-            modelo.setPergunta(pergunta);
-            modelo.setValor(dto.getValue());
+            modelo.setGuest(hospede);
+            modelo.setQuestion(pergunta);
+            modelo.setValue(dto.getValue());
 
             salvas.add(respostaRepository.save(modelo));
         }
@@ -57,12 +57,12 @@ public class RespostaService {
         for (RespostaModel r : respostas) {
             RespostaDto dto = new RespostaDto();
 
-            PerguntaModel p = r.getPergunta();
+            PerguntaModel p = r.getQuestion();
             if (p != null) {
                 dto.setQuestionId(p.getId());
             }
 
-            dto.setValue(r.getValor());
+            dto.setValue(r.getValue());
             listaRetorno.add(dto);
         }
 

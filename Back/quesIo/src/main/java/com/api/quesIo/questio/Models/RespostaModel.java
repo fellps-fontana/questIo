@@ -1,7 +1,9 @@
 package com.api.quesIo.questio.Models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -9,26 +11,28 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "respostas")
-public class RespostaModel {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "respostas") // Tabela em Português
+public class RespostaModel { // Classe em Português
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    // Guarda "5", "true", "Muito bom" -> Tudo virou String no banco
     @Column(nullable = false)
-    private String valor;
+    private String value; // O valor da resposta (Ex: "5", "Excelente")
 
     @CreationTimestamp
-    private LocalDateTime respondidoEm;
+    private LocalDateTime answeredAt;
 
-    // Relacionamentos
+    // Quem respondeu? (Classe em PT, campo em EN)
     @ManyToOne
     @JoinColumn(name = "hospede_id", nullable = false)
-    private HospedeModel hospede;
+    private HospedeModel guest;
 
+    // Respondeu qual pergunta? (Classe em PT, campo em EN)
     @ManyToOne
     @JoinColumn(name = "pergunta_id", nullable = false)
-    private PerguntaModel pergunta;
+    private PerguntaModel question;
 }

@@ -63,13 +63,13 @@ public class HospedeService {
 
         // Se questionarioId for nulo, desatribui
         if (questionarioId == null) {
-            hospede.setQuestionarioAtribuido(null);
+            hospede.setAssignedQuestionnaire(null);
         } else {
             // Busca o questionário no banco (precisa injetar o QuestionarioRepository)
             QuestionarioModel questionario = questionarioRepository.findById(questionarioId)
                     .orElseThrow(() -> new RuntimeException("Questionário não encontrado"));
 
-            hospede.setQuestionarioAtribuido(questionario);
+            hospede.setAssignedQuestionnaire(questionario);
         }
 
         hospedeRepository.save(hospede);
@@ -82,8 +82,8 @@ public class HospedeService {
         dto.setLinkAcesso(FRONT_URL + model.getId());
 
         // Manda o ID do form atribuído (se tiver)
-        if (model.getQuestionarioAtribuido() != null) {
-            dto.setAssignedFormId(model.getQuestionarioAtribuido().getId());
+        if (model.getAssignedQuestionnaire() != null) {
+            dto.setAssignedFormId(model.getAssignedQuestionnaire().getId());
         }
 
         return dto;
@@ -111,7 +111,7 @@ public class HospedeService {
         // Se quiser travar por data, descomente a linha abaixo:
         // validarAcessoAoFormulario(hospedeId);
 
-        QuestionarioModel questionario = hospede.getQuestionarioAtribuido();
+        QuestionarioModel questionario = hospede.getAssignedQuestionnaire();
         if (questionario == null) {
             throw new RuntimeException("Nenhuma pesquisa foi atribuída para você.");
         }

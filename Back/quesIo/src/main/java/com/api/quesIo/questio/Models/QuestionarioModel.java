@@ -2,7 +2,9 @@ package com.api.quesIo.questio.Models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -11,8 +13,10 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "questionarios")
-public class QuestionarioModel {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "questionarios") // Tabela em Português
+public class QuestionarioModel { // Classe em Português
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +32,12 @@ public class QuestionarioModel {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "questionario", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Relacionamento OneToMany: Uma lista de PerguntaModel chamada 'questions'
+    @OneToMany(mappedBy = "questionnaire", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<PerguntaModel> questions = new ArrayList<>();
 
-    // --- CAMPOS CALCULADOS (NÃO SALVAM NO BANCO) ---
-    // Adicione estes campos para corrigir o erro no Service
-
+    // Campos calculados (não salvam no banco)
     @Transient
     private Integer totalAnswers;
 
